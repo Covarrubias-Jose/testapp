@@ -4,12 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Basketball Stat Tracker</title>
-<!-- Tailwind CSS CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
-<!-- Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-<!-- PWA-specific links -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#007bff">
 <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png">
@@ -74,7 +71,8 @@ body {
     width: 100%;
     background-color: #e0e7ff;
     color: #4f46e5;
-    padding: 0.7rem 0.5rem;
+    /* Adjusted padding to accommodate larger font */
+    padding: 0.8rem 0.5rem; 
     font-weight: bold;
     border-radius: 0.6rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -179,9 +177,11 @@ body {
         opacity: 0.9;
         margin-bottom: 0.1rem;
     }
+    /* MODIFIED: Player name font size for small screens */
     .player-name {
-        font-size: 0.7rem;
+        font-size: 0.9rem; /* Slightly larger on small screens */
     }
+    /* MODIFIED: Player stats margin top for small screens */
     .player-stats span {
         font-size: 0.65rem;
     }
@@ -192,6 +192,17 @@ body {
     .text-sm { font-size: 0.65rem; }
     .text-lg { font-size: 0.8rem; }
 }
+
+/* MODIFIED: Player name font size for larger screens (default) */
+.player-name {
+    font-size: 1.5rem; /* Equivalent to 24px */
+    line-height: 1.2; /* Adjust line-height if needed */
+}
+/* MODIFIED: Player stats margin-top adjustment */
+.player-stats {
+    margin-top: 0.2rem; /* Increased margin to create space below the name */
+}
+
 
 /* Modal styling */
 .modal-overlay {
@@ -227,12 +238,9 @@ body {
 <h1 class="text-3xl font-extrabold text-center text-gray-900 mb-6">Basketball Game Tracker</h1>
 <p class="text-center text-gray-600 mb-6 text-sm">Data stored locally in your browser.</p>
 
-<!-- Stat Buttons (This div is now just a placeholder, its content moved to the new modal) -->
 <div id="stat-buttons" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 hidden">
-    <!-- Content moved to #stat-selection-modal -->
-</div>
+    </div>
 
-<!-- Scoreboard -->
 <div class="scoreboard-container bg-gradient-to-r from-blue-700 to-indigo-800 text-white shadow-lg mb-4">
 <div id="my-team-score-wrapper" class="flex flex-col items-center flex-grow py-0.5">
 <h2 class="scoreboard-title">My Team</h2>
@@ -247,20 +255,17 @@ body {
 </div>
 </div>
 
-<!-- Players Section -->
 <div id="players-grid" class="grid grid-cols-2 gap-2">
-<!-- Player buttons will be dynamically inserted here by JavaScript -->
 </div>
 
-<!-- Action Buttons -->
 <div class="flex justify-center mt-4 space-x-2">
 <button id="reset-game-btn" class="btn-action bg-yellow-500 text-white hover:bg-yellow-600 px-4 py-1.5 text-md">Reset Game</button>
 <button id="edit-all-players-btn" class="btn-action bg-blue-500 text-white hover:bg-blue-600 px-4 py-1.5 text-md">Edit Players</button>
 <button id="generate-report-btn" class="btn-action bg-green-500 text-white hover:bg-green-600 px-4 py-1.5 text-md">Generate Report</button>
+<button id="clear-data-info-btn" class="btn-action bg-gray-500 text-white hover:bg-gray-600 px-4 py-1.5 text-md">Clear App Data Info</button>
 </div>
 </div>
 
-<!-- NEW: Stat Selection Modal -->
 <div id="stat-selection-modal" class="fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50 hidden">
     <div class="modal-content transform transition-all duration-300 scale-95 opacity-0">
         <h3 class="text-xl font-bold mb-4 text-gray-800 text-center">Add Stat for <span id="selected-player-name" class="text-indigo-600"></span></h3>
@@ -278,19 +283,18 @@ body {
                 <span class="text-xl sm:text-2xl font-extrabold">🔥</span> Points
             </button>
         </div>
-        <div class="flex justify-center">
+        <div class="flex justify-center space-x-2">
+            <button id="undo-last-stat-btn" class="px-4 py-1.5 rounded-md bg-red-500 text-white hover:bg-red-600 font-semibold text-sm">Undo Last Stat</button>
             <button id="cancel-stat-selection-btn" class="px-4 py-1.5 rounded-md bg-gray-300 text-gray-800 hover:bg-gray-400 font-semibold text-sm">Back to Players</button>
         </div>
     </div>
 </div>
 
 
-<!-- Global Edit Players Modal -->
 <div id="edit-all-players-modal" class="fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50 hidden">
 <div class="modal-content transform transition-all duration-300 scale-95 opacity-0 max-h-[90vh] overflow-y-auto">
 <h3 class="text-xl font-bold mb-3 text-gray-800">Edit All Players</h3>
 <div id="all-players-edit-list" class="space-y-3 mb-4">
-<!-- Player edit fields will be dynamically inserted here -->
 </div>
 <div class="flex justify-end space-x-2">
 <button id="save-all-players-btn" class="px-4 py-1.5 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 font-semibold text-sm">Save All</button>
@@ -299,7 +303,6 @@ body {
 </div>
 </div>
 
-<!-- Report Modal -->
 <div id="report-modal" class="fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50 hidden">
 <div class="modal-content transform transition-all duration-300 scale-95 opacity-0">
 <h3 class="text-xl font-bold mb-3 text-gray-800">Game Report</h3>
@@ -311,8 +314,42 @@ body {
 </div>
 </div>
 
+<div id="clear-data-info-modal" class="fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50 hidden">
+    <div class="modal-content transform transition-all duration-300 scale-95 opacity-0 max-h-[90vh] overflow-y-auto">
+        <h3 class="text-xl font-bold mb-3 text-gray-800">How to Clear App Data</h3>
+        <p class="text-gray-700 mb-4 text-sm">
+            This application stores your game data (scores, player stats, names) directly in your browser's 
+            **Local Storage**. This means your data is saved on your device and will persist even if you 
+            close the browser or turn off your computer.
+        </p>
+        <p class="text-gray-700 mb-4 text-sm">
+            To clear this data, you typically need to clear your browser's site data or cache for this specific website.
+            Here are general steps for common browsers:
+        </p>
+        <ul class="list-disc list-inside text-gray-700 mb-4 text-sm space-y-2">
+            <li>
+                <strong>Chrome:</strong> Go to Settings > Privacy and security > Site Settings > View permissions and data stored across sites. Search for this website, click on it, and then click "Clear data".
+            </li>
+            <li>
+                <strong>Firefox:</strong> Go to Settings > Privacy & Security > Cookies and Site Data > Manage Data. Search for this website, select it, and click "Remove Selected".
+            </li>
+            <li>
+                <strong>Edge:</strong> Go to Settings > Cookies and site permissions > Manage and delete cookies and site data > See all cookies and site data. Search for this website and click the trash can icon next to it.
+            </li>
+            <li>
+                <strong>Safari (iOS/iPadOS):</strong> Go to iOS Settings > Safari > Advanced > Website Data. You can either remove all website data or edit and remove data for specific sites.
+            </li>
+        </ul>
+        <p class="text-gray-700 mb-5 text-sm">
+            Clearing this data will reset the app to its initial state.
+        </p>
+        <div class="flex justify-end">
+            <button id="close-clear-data-info-btn" class="px-4 py-1.5 rounded-md bg-gray-300 text-gray-800 hover:bg-gray-400 font-semibold text-sm">Close</button>
+        </div>
+    </div>
+</div>
 
-<!-- Message Box (for alerts, confirmations) -->
+
 <div id="message-box-modal" class="fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50 hidden">
 <div class="modal-content transform transition-all duration-300 scale-95 opacity-0">
 <h3 id="message-box-title" class="text-xl font-bold mb-3 text-gray-800"></h3>
@@ -334,6 +371,8 @@ const STAT_TYPES = ['shots', 'rebounds', 'assists', 'points'];
 let activeStat = null; 
 let players = []; // Array to hold player objects
 let activePlayerId = null; // New variable to track the currently selected player
+// NEW: Stack to keep track of the last stat added for undo functionality
+let lastStatActions = []; // Stores { playerId, statType, valueChanged, isMyTeamScoreChange, rivalScoreChangedValue }
 
 // --- Message Box Utility ---
 const messageBoxModal = document.getElementById('message-box-modal');
@@ -410,14 +449,6 @@ function updateUI() {
 document.getElementById('my-team-score').textContent = myTeamScore;
 document.getElementById('rival-team-score').textContent = rivalTeamScore;
 
-// MODIFIED: Stat buttons are now in a separate modal, so this block is no longer needed for visibility
-// const statButtonsContainer = document.getElementById('stat-buttons');
-// if (activePlayerId) {
-// statButtonsContainer.classList.remove('hidden');
-// } else {
-// statButtonsContainer.classList.add('hidden');
-// }
-
 // Render player buttons
 const playersGrid = document.getElementById('players-grid');
 playersGrid.innerHTML = ''; // Clear existing buttons
@@ -434,16 +465,16 @@ playerButton.classList.add('player-active');
 }
 
 playerButton.innerHTML = `
-        <span class="player-name text-sm font-semibold">${player.name}</span>
-        <div class="player-stats text-xs text-gray-600 mt-0.5">
-          <span class="shots-stat">S: ${player.stats.shots}</span> |
-          <span class="rebounds-stat">R: ${player.stats.rebounds}</span> |
-          <span class="assists-stat">A: ${player.stats.assists}</span> |
-          <span class="points-stat">P: ${player.stats.points}</span>
+        <span class="player-name font-semibold">${player.name}</span>
+        <div class="player-stats text-xs text-gray-600">
+            <span class="shots-stat">S: ${player.stats.shots}</span> |
+            <span class="rebounds-stat">R: ${player.stats.rebounds}</span> |
+            <span class="assists-stat">A: ${player.stats.assists}</span> |
+            <span class="points-stat">P: ${player.stats.points}</span>
         </div>
-      `;
+    `;
 
-// MODIFIED: Use a click listener to select a player
+// Use a click listener to select a player
 playerButton.addEventListener('click', () => {
 if (player.locked) {
     showMessageBox('Locked Player', 'This player is locked and cannot be selected to add stats.', 'alert');
@@ -454,27 +485,8 @@ selectPlayer(player.id);
 
 playersGrid.appendChild(playerButton);
 });
-
-// MODIFIED: Stat buttons styling is now handled when the modal is opened
-// STAT_TYPES.forEach(stat => {
-// const button = document.getElementById(`${stat}-btn`);
-// if (button) {
-// if (stat === activeStat) {
-// button.classList.add('stat-active');
-// button.classList.remove('stat-inactive');
-// button.classList.remove('bg-indigo-100', 'text-indigo-700', 'hover:bg-indigo-200');
-// button.classList.add('bg-indigo-600', 'text-white', 'hover:bg-indigo-700');
-// } else {
-// button.classList.remove('stat-active');
-// button.classList.add('stat-inactive');
-// button.classList.remove('bg-indigo-600', 'text-white', 'hover:bg-indigo-700');
-// button.classList.add('bg-indigo-100', 'text-indigo-700', 'hover:bg-indigo-200');
-// }
-// }
-// });
 }
 
-// MODIFIED: New function to handle player selection and open the stat modal
 const statSelectionModal = document.getElementById('stat-selection-modal');
 const selectedPlayerNameSpan = document.getElementById('selected-player-name');
 
@@ -496,40 +508,92 @@ function selectPlayer(playerId) {
     updateUI(); // Update player button active state
 }
 
-// MODIFIED: This function is now for incrementing a stat for the active player
+// MODIFIED: Function to increment a stat for the active player, now also recording for undo
 function incrementPlayerStat(statType) {
-if (!activePlayerId) {
-    showMessageBox('No Player Selected', 'Please select a player first.', 'alert');
-    return;
-}
-
-const playerIndex = players.findIndex(p => p.id === activePlayerId);
-if (playerIndex !== -1) {
-    // Check if the active stat is 'points'
-    if (statType === 'points') {
-    players[playerIndex].stats[statType] += 2; // Increment player's points by 2
-    myTeamScore += 2; // Increment team score by 2
-    } else {
-    players[playerIndex].stats[statType]++; // Increment other stats by 1
+    if (!activePlayerId) {
+        showMessageBox('No Player Selected', 'Please select a player first.', 'alert');
+        return;
     }
 
-    // MODIFIED: After adding a stat, deselect the player and close the modal
-    activePlayerId = null;
-    activeStat = null; // Reset active stat
-    closeStatSelectionModal(); // Close the modal
+    const playerIndex = players.findIndex(p => p.id === activePlayerId);
+    if (playerIndex !== -1) {
+        let valueAdded = 0;
+        let myTeamScoreChange = 0;
+
+        if (statType === 'points') {
+            players[playerIndex].stats[statType] += 2;
+            players[playerIndex].stats['shots']++; // Increment shots when points are added
+            myTeamScore += 2;
+            valueAdded = 2; // For points stat
+            myTeamScoreChange = 2;
+            // Record both point and shot increments for undo
+            lastStatActions.push({ playerId: activePlayerId, statType: 'points', valueChanged: 2, isMyTeamScoreChange: true, myTeamScoreChangedValue: 2 });
+            lastStatActions.push({ playerId: activePlayerId, statType: 'shots', valueChanged: 1, isMyTeamScoreChange: false });
+        } else {
+            players[playerIndex].stats[statType]++;
+            valueAdded = 1; // For other stats
+            lastStatActions.push({ playerId: activePlayerId, statType: statType, valueChanged: 1, isMyTeamScoreChange: false });
+        }
+
+        // Limit undo stack size (e.g., last 10 actions)
+        if (lastStatActions.length > 10) {
+            lastStatActions.shift(); // Remove the oldest action
+        }
+
+        activePlayerId = null;
+        activeStat = null; // Reset active stat
+        closeStatSelectionModal();
+        
+        saveGameData();
+        updateUI();
+    } else {
+        console.error(`Player with ID ${activePlayerId} not found.`);
+    }
+}
+
+// NEW: Function to increment rival points, recording for undo
+function incrementRivalPoints() {
+    rivalTeamScore += 2;
+    lastStatActions.push({ playerId: 'rival', statType: 'points', valueChanged: 2, isMyTeamScoreChange: false, rivalScoreChangedValue: 2 });
+    if (lastStatActions.length > 10) {
+        lastStatActions.shift();
+    }
+    saveGameData();
+    updateUI();
+}
+
+// NEW: Undo functionality
+function undoLastStat() {
+    if (lastStatActions.length === 0) {
+        showMessageBox('No Actions to Undo', 'There are no recent actions to undo.', 'alert');
+        return;
+    }
+
+    const lastAction = lastStatActions.pop(); // Get the last action
+
+    if (lastAction.playerId === 'rival') {
+        rivalTeamScore -= lastAction.valueChanged;
+        showMessageBox('Undo Successful', `Undid ${lastAction.valueChanged} points for Rival Team.`, 'alert');
+    } else {
+        const playerIndex = players.findIndex(p => p.id === lastAction.playerId);
+        if (playerIndex !== -1) {
+            players[playerIndex].stats[lastAction.statType] -= lastAction.valueChanged;
+            if (lastAction.isMyTeamScoreChange) {
+                myTeamScore -= lastAction.myTeamScoreChangedValue;
+            }
+            showMessageBox('Undo Successful', `Undid ${lastAction.valueChanged} ${lastAction.statType} for ${players[playerIndex].name}.`, 'alert');
+        } else {
+            console.error('Player for last action not found:', lastAction.playerId);
+            showMessageBox('Undo Error', 'Could not find player for last action.', 'alert');
+            // Optionally, push the action back if player not found
+            lastStatActions.push(lastAction); 
+        }
+    }
     
     saveGameData();
     updateUI();
-} else {
-    console.error(`Player with ID ${activePlayerId} not found.`);
-}
 }
 
-function incrementRivalPoints() {
-rivalTeamScore += 2;
-saveGameData();
-updateUI();
-}
 
 // --- Local Storage Operations ---
 const LOCAL_STORAGE_KEY = 'basketballGameData';
@@ -543,7 +607,9 @@ players: players.map(player => ({
 stats: { ...player.stats }
 })),
 activeStat: activeStat,
-activePlayerId: activePlayerId
+activePlayerId: activePlayerId,
+// NEW: Save the undo stack
+lastStatActions: lastStatActions 
 };
 try {
 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
@@ -563,6 +629,8 @@ rivalTeamScore = data.rivalTeamScore || 0;
 players = data.players || [];
 activeStat = data.activeStat || null;
 activePlayerId = data.activePlayerId || null;
+// NEW: Load the undo stack, with a fallback
+lastStatActions = data.lastStatActions || []; 
 initialSetup();
 } else {
 initialSetup();
@@ -704,14 +772,17 @@ return report;
 
 
 // --- Event Listeners for Main Buttons ---
-// MODIFIED: Stat buttons now listen on the modal
 document.getElementById('modal-shots-btn').addEventListener('click', () => incrementPlayerStat('shots'));
 document.getElementById('modal-rebounds-btn').addEventListener('click', () => incrementPlayerStat('rebounds'));
 document.getElementById('modal-assists-btn').addEventListener('click', () => incrementPlayerStat('assists'));
 document.getElementById('modal-points-btn').addEventListener('click', () => incrementPlayerStat('points'));
 document.getElementById('rival-score-button').addEventListener('click', incrementRivalPoints);
 
-// MODIFIED: Close button for the stat selection modal
+// NEW: Undo button event listener
+document.getElementById('undo-last-stat-btn').addEventListener('click', undoLastStat);
+
+
+// Close button for the stat selection modal
 document.getElementById('cancel-stat-selection-btn').addEventListener('click', () => {
     activePlayerId = null; // Deselect player
     activeStat = null; // Clear active stat
@@ -737,7 +808,8 @@ rivalTeamScore = 0;
 players.forEach(player => {
 STAT_TYPES.forEach(stat => player.stats[stat] = 0);
 });
-activePlayerId = null; // MODIFIED: Reset active player on game reset
+lastStatActions = []; // NEW: Clear undo stack on full game reset
+activePlayerId = null; 
 activeStat = null;
 saveGameData();
 updateUI();
@@ -745,6 +817,26 @@ showMessageBox('Game Reset', 'The game has been reset successfully!', 'alert');
 }
 );
 });
+
+// Event listeners for the Clear Data Info modal
+const clearDataInfoBtn = document.getElementById('clear-data-info-btn');
+const clearDataInfoModal = document.getElementById('clear-data-info-modal');
+const closeClearDataInfoBtn = document.getElementById('close-clear-data-info-btn');
+
+clearDataInfoBtn.addEventListener('click', () => {
+    clearDataInfoModal.classList.remove('hidden');
+    setTimeout(() => {
+        clearDataInfoModal.querySelector('.modal-content').classList.remove('scale-95', 'opacity-0');
+        clearDataInfoModal.querySelector('.modal-content').classList.add('scale-100', 'opacity-100');
+    }, 50);
+});
+
+closeClearDataInfoBtn.addEventListener('click', () => {
+    clearDataInfoModal.classList.add('hidden');
+    clearDataInfoModal.querySelector('.modal-content').classList.remove('scale-100', 'opacity-100');
+    clearDataInfoModal.querySelector('.modal-content').classList.add('scale-95', 'opacity-0');
+});
+
 
 // Register the Service Worker
 if ('serviceWorker' in navigator) {
