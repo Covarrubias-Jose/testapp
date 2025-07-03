@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basketball Stat Tracker</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <meta name="theme-color" content="#3B82F6">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image: url('court.jpg'); /* This assumes court.jpg is in the same directory */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed; /* Ensures background stays fixed during scroll */
+            background-color: #f0f2f5; /* Fallback color */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top */
+            min-height: 100vh;
+            padding: 0.25rem;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.7); 
+            border-radius: 1.25rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem;
+        }
+        .btn-stat, .btn-score, .btn-action {
+            padding: 0.6rem 0.4rem;
+            font-weight: bold;
+            border-radius: 0.6rem;
+            transition: transform 0.1s ease-in-out, background-color 0.1s ease-in-out;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            line-height: 1.1;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-stat:active, .btn-score:active, .btn-action:active {
+            transform: scale(0.98);
+        }
+        .stat-active {
+            background-color: #4f46e5;
+            color: white;
+            box-shadow: 0 3px 6px rgba(79, 70, 229, 0.3);
+        }
+        .stat-inactive {
+            background-color: #e0e7ff;
+            color: #4f46e5;
+        }
+
+        /* Player Button Styling */
+        .btn-player {
+            position: relative;
+            width: 100%;
+            background-color: #e0e7ff;
+            color: #4f46e5;
+            padding: 1.2rem 1rem; /* Adjusted padding to accommodate 24px font better */
+            font-weight: bold;
+            border-radius: 0.6rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.1s ease-in-out, background-color 0.1s ease-in-out, border 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 1.3;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
+            border: 2px solid transparent; 
+        }
+        .btn-player:hover {
+            background-color: #c7d2fe;
+        }
+        .player-active {
+            background-color: #bfdbfe;
+            border: 2px solid #2563eb;
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+        }
+        .player-button-locked {
+            background-color: #d1d5db;
+            cursor: not-allowed;
+        }
+        .player-button-locked .player-name, 
+        .player-button-locked .player-stats span {
+            color: #6b7280;
+        }
+
+        /* Player Name and Stats Font Sizes */
+        .player-name {
+            font-size: 24px; /* Player name font size */
+            font-weight: bold; 
+        }
+        .player-stats {
+            margin-top: 0.15rem; /* Spacing between name and stats */
+        }
+        .player-stats span {
+            font-size: 0.75rem; /* Small stats font size */
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 480px) {
+            .btn-stat, .btn-action {
+                font-size: 0.7rem;
+                padding: 0.6rem 0.4rem;
+            }
+            .btn-stat span {
+                font-size: 1.5rem;
+            }
+            .scoreboard-container {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-around;
+                background-color: #3b82f6;
+                color: white;
+                padding: 0.6rem;
+                border-radius: 0.6rem;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                width: 100%;
+            }
+            /* Common styles for team sections in scoreboard */
+            #my-team-score-wrapper, #rival-team-score-wrapper {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                flex-grow: 1;
+                padding: 0.2rem;
+            }
+            /* My Team Score (Number) */
+            #my-team-score {
+                font-size: 2.0rem; /* Consistent score font size */
+            }
+            /* Rival Team Score (Number - inside the button) */
+            #rival-team-score { /* Target the span directly for font size */
+                font-size: 2.0rem; /* Consistent score font size */
+            }
+            /* Style for the new clickable rival score button */
+            #rival-score-button {
+                background: none;
+                border: none;
+                padding: 0.2rem 0.5rem;
+                cursor: pointer;
+                color: inherit;
+                transition: transform 0.1s ease-in-out, color 0.1s ease-in-out;
+                font-weight: extrabold; /* Ensure bold for the number */
+                line-height: 1.0;
+            }
+            #rival-score-button:active {
+                transform: scale(0.95);
+                color: #ffe600;
+            }
+            
+            .scoreboard-vs {
+                font-size: 1.2rem;
+                margin: 0 0.5rem;
+                font-weight: normal;
+                opacity: 0.8;
+            }
+            /* My Team Title */
+            #my-team-score-wrapper .scoreboard-title {
+                font-size: 0.8rem; /* Consistent title font size */
+                font-weight: normal;
+                opacity: 0.9;
+                margin-bottom: 0.1rem;
+            }
+            /* Rival Team Title */
+            #rival-team-score-wrapper .scoreboard-title {
+                font-size: 0.8rem; /* Consistent title font size */
+                font-weight: normal;
+                opacity: 0.9;
+                margin-bottom: 0.1rem;
+            }
+            /* Responsive adjustment for player name on small screens */
+            .player-name {
+                font-size: 22px; /* Player name font size for mobile */
+            }
+            .player-stats span {
+                font-size: 0.65rem; /* Small stats font size for mobile */
+            }
+            .text-3xl { font-size: 1.5rem; }
+            .text-sm { font-size: 0.65rem; }
+            .text-lg { font-size: 0.8rem; }
+        }
+
+        /* Modal styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 350px;
+        }
+        /* Report Modal Specifics */
+        #report-output {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            line-height: 1.4;
+            color: #334155;
+            resize: vertical;
+        }
+
+        /* Toast Message Styling */
+        .toast {
+            position: fixed;
+            background-color: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            text-align: center;
+            z-index: 1000;
+        }
+        .toast.info { background-color: #3b82f6; }
+        .toast.success { background-color: #10b981; }
+        .toast.error { background-color: #ef4444; }
+        .toast.warning { background-color: #f59e0b; }
+        .toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="scoreboard-container flex items-center justify-around bg-blue-500 text-white p-3 rounded-xl shadow-md mb-4">
+            <div id="my-team-score-wrapper" class="flex flex-col items-center">
+                <span class="scoreboard-title text-sm opacity-90">My Team</span>
+                <span id="my-team-score" class="text-4xl font-extrabold">0</span>
+            </div>
+            <span class="scoreboard-vs text-2xl font-normal opacity-80 mx-2">VS</span>
+            <div id="rival-team-score-wrapper" class="flex flex-col items-center">
+                <span class="scoreboard-title text-sm opacity-90">Rival Points</span>
+                <button id="rival-score-button" class="text-4xl font-extrabold">
+                    <span id="rival-team-score">0</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="players-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
+            </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+            <button id="reset-game-btn" class="btn-action bg-red-500 hover:bg-red-600 text-white col-span-2 sm:col-span-1">Reset Game</button>
+            <button id="edit-players-btn" class="btn-action bg-gray-500 hover:bg-gray-600 text-white col-span-2 sm:col-span-1">Edit Players</button>
+            <button id="generate-report-btn" class="btn-action bg-green-500 hover:bg-green-600 text-white col-span-2 sm:col-span-1">Generate Report</button>
+            <button id="app-data-info-btn" class="btn-action bg-blue-500 hover:bg-blue-600 text-white col-span-2 sm:col-span-1">App Info</button>
+        </div>
+    </div>
+
+    <div id="stat-selection-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 class="text-xl font-bold text-center mb-4">Select Stat for <span id="selected-player-name" class="text-blue-600"></span></h2>
+            <div class="grid grid-cols-2 gap-2">
+                <button class="btn-stat bg-green-400 hover:bg-green-500 text-white" data-stat="points" data-value="1">Points<span class="text-3xl">+1</span></button>
+                <button class="btn-stat bg-green-500 hover:bg-green-600 text-white" data-stat="points" data-value="2">Points<span class="text-3xl">+2</span></button>
+                <button class="btn-stat bg-green-600 hover:bg-green-700 text-white" data-stat="points" data-value="3">Points<span class="text-3xl">+3</span></button>
+                <button class="btn-stat bg-blue-400 hover:bg-blue-500 text-white" data-stat="rebounds" data-value="1">Rebounds<span class="text-3xl">+1</span></button>
+                <button class="btn-stat bg-blue-500 hover:bg-blue-600 text-white" data-stat="assists" data-value="1">Assists<span class="text-3xl">+1</span></button>
+                <button class="btn-stat bg-blue-600 hover:bg-blue-700 text-white" data-stat="shots" data-value="1">Shots<span class="text-3xl">+1</span></button>
+            </div>
+            <div class="flex justify-around mt-4 space-x-2">
+                <button id="back-to-players-btn" class="btn-action bg-gray-300 hover:bg-gray-400 text-gray-800">Back to Players</button>
+                <button id="undo-last-stat-btn" class="btn-action bg-yellow-500 hover:bg-yellow-600 text-white">Undo Last Stat</button>
+                <button id="close-stat-selection-btn" class="btn-action bg-red-500 hover:bg-red-600 text-white">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-players-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 class="text-xl font-bold text-center mb-4">Edit Players</h2>
+            <form id="add-player-form" class="flex mb-4">
+                <input type="text" id="new-player-name" placeholder="New Player Name" class="flex-grow p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="submit" id="add-player-btn-modal" class="bg-blue-500 text-white px-4 rounded-r-md hover:bg-blue-600">Add</button>
+            </form>
+            <ul id="edit-players-list" class="max-h-60 overflow-y-auto mb-4 border border-gray-200 rounded-md p-2">
+                </ul>
+            <button id="close-edit-players-btn" class="btn-action w-full bg-gray-300 hover:bg-gray-400 text-gray-800">Done</button>
+        </div>
+    </div>
+
+    <div id="report-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 class="text-xl font-bold text-center mb-4">Game Report</h2>
+            <pre id="report-output" class="mb-4"></pre>
+            <button id="close-report-btn" class="btn-action w-full bg-gray-300 hover:bg-gray-400 text-gray-800">Close</button>
+        </div>
+    </div>
+
+    <div id="app-data-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 class="text-xl font-bold text-center mb-4">App Data Info</h2>
+            <p class="text-gray-700 mb-4">
+                This app stores your game data directly in your browser's local storage. This means your stats will be saved even if you close the tab or browser.
+                <br><br>
+                **To clear all saved data (players and stats):**
+                Go to your browser's settings: `Privacy and security` > `Site Settings` > `Local Storage` (or similar, depending on browser) and clear data for this site.
+            </p>
+            <button id="close-app-data-btn" class="btn-action w-full bg-gray-300 hover:bg-gray-400 text-gray-800">Got It</button>
+        </div>
+    </div>
+
+    <script>
+        // Service Worker for PWA - This part stays outside DOMContentLoaded for quicker registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => { 
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered:', registration);
+                    })
+                    .catch(error => {
+                        console.error('Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        // --- All your main JavaScript code goes inside this DOMContentLoaded block ---
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Global Variables ---
+            let players = [];
+            let activePlayerId = null;
+            let myTeamScore = 0;
+            let rivalPoints = 0;
+            const MAX_PLAYERS = 15; 
+
+            let lastStatChange = null; 
+
+
+            // --- DOM Elements ---
+            const playersGrid = document.getElementById('players-grid');
+            const statSelectionOverlay = document.getElementById('stat-selection-overlay');
+            const selectedPlayerNameSpan = document.getElementById('selected-player-name');
+            const myTeamScoreSpan = document.getElementById('my-team-score');
+            const rivalTeamScoreSpan = document.getElementById('rival-team-score');
+            const rivalScoreButton = document.getElementById('rival-score-button'); 
+            const resetGameBtn = document.getElementById('reset-game-btn');
+            const editPlayersBtn = document.getElementById('edit-players-btn');
+            const generateReportBtn = document.getElementById('generate-report-btn');
+            const appDataInfoBtn = document.getElementById('app-data-info-btn');
+            const editPlayersOverlay = document.getElementById('edit-players-overlay');
+            const editPlayersList = document.getElementById('edit-players-list');
+            const addPlayerForm = document.getElementById('add-player-form');
+            const newPlayerNameInput = document.getElementById('new-player-name');
+            const reportOverlay = document.getElementById('report-overlay');
+            const reportOutput = document.getElementById('report-output');
+            const appDataOverlay = document.getElementById('app-data-overlay');
+
+            const undoLastStatBtn = document.getElementById('undo-last-stat-btn'); 
+
+            // New/updated modal close buttons (using IDs now for consistency)
+            const closeEditPlayersBtn = document.getElementById('close-edit-players-btn');
+            const closeReportBtn = document.getElementById('close-report-btn');
+            const closeAppDataBtn = document.getElementById('close-app-data-btn');
+
+
+            // --- Event Listeners ---
+            document.getElementById('add-player-btn-modal').addEventListener('click', () => { 
+                if (players.length < MAX_PLAYERS) {
+                    newPlayerNameInput.focus(); 
+                } else {
+                    showToast('Maximum players reached!', 'error');
+                }
+            });
+
+            addPlayerForm.addEventListener('submit', addPlayer);
+
+            document.querySelectorAll('.stat-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    if (activePlayerId !== null) {
+                        const statType = event.currentTarget.dataset.stat;
+                        const value = parseInt(event.currentTarget.dataset.value);
+                        updatePlayerStat(activePlayerId, statType, value);
+                    }
+                });
+            });
+
+            document.getElementById('back-to-players-btn').addEventListener('click', () => {
+                statSelectionOverlay.classList.add('hidden');
+                renderPlayers(); 
+            });
+
+            document.getElementById('close-stat-selection-btn').addEventListener('click', () => {
+                statSelectionOverlay.classList.add('hidden');
+                renderPlayers();
+            });
+
+            undoLastStatBtn.addEventListener('click', undoLastStat);
+
+            rivalScoreButton.addEventListener('click', () => {
+                updateRivalScore(1); 
+            });
+
+            resetGameBtn.addEventListener('click', resetGame);
+            editPlayersBtn.addEventListener('click', openEditPlayersModal);
+            generateReportBtn.addEventListener('click', openReportModal); // Renamed function for consistency
+            appDataInfoBtn.addEventListener('click', openAppDataModal);
+
+
+            // --- Modal Close Button Event Listeners ---
+            closeEditPlayersBtn.addEventListener('click', closeEditPlayersModal);
+            closeReportBtn.addEventListener('click', closeReportModal);
+            closeAppDataBtn.addEventListener('click', closeAppDataModal);
+
+
+            // --- Functions ---
+            function showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.textContent = message;
+                toast.classList.add('toast', type);
+                document.body.appendChild(toast);
+
+                const scoreboard = document.querySelector('.scoreboard-container');
+                if (scoreboard) {
+                    const scoreboardRect = scoreboard.getBoundingClientRect();
+                    toast.style.top = `${scoreboardRect.bottom + 10}px`; 
+                    toast.style.left = '50%';
+                    toast.style.transform = 'translateX(-50%)';
+                    toast.style.zIndex = '1000'; 
+                } else {
+                    toast.style.bottom = '20px';
+                    toast.style.left = '50%';
+                    toast.style.transform = 'translateX(-50%)';
+                    toast.style.zIndex = '1000';
+                }
+
+                setTimeout(() => {
+                    toast.remove();
+                }, 2500);
+            }
+
+
+            function renderPlayers() {
+                playersGrid.innerHTML = ''; 
+
+                if (players.length === 0) {
+                    playersGrid.innerHTML = '<p class="text-center text-gray-500 col-span-3">No players yet. Add some!</p>';
+                }
+
+                players.forEach(player => {
+                    const playerButton = document.createElement('button');
+                    playerButton.classList.add('btn-player');
+                    if (player.id === activePlayerId) {
+                        playerButton.classList.add('player-active');
+                    }
+
+                    playerButton.innerHTML = `
+                        <span class="player-name">${player.name || `P${player.id}`}</span>
+                        <div class="player-stats text-sm">
+                            <span>S:${player.shots}</span>
+                            <span>R:${player.rebounds}</span>
+                            <span>A:${player.assists}</span>
+                            <span>P:<span class="font-bold">${player.points}</span></span>
+                        </div>
+                    `;
+                    playerButton.addEventListener('click', () => selectPlayer(player.id));
+                    playersGrid.appendChild(playerButton);
+                });
+
+                if (players.length < MAX_PLAYERS) {
+                    const addPlayerButton = document.createElement('button');
+                    addPlayerButton.id = 'add-player-btn'; 
+                    addPlayerButton.classList.add('btn-player', 'border-dashed', 'border-2', 'border-gray-400', 'text-gray-500', 'hover:bg-gray-100', 'flex', 'flex-col', 'items-center', 'justify-center');
+                    addPlayerButton.innerHTML = `<span class="text-3xl">+</span><span class="text-sm mt-1">Add Player</span>`;
+                    addPlayerButton.addEventListener('click', () => {
+                        if (players.length < MAX_PLAYERS) {
+                            openEditPlayersModal(); 
+                            newPlayerNameInput.focus();
+                        } else {
+                            showToast('Maximum players reached!', 'error');
+                        }
+                    });
+                    playersGrid.appendChild(addPlayerButton);
+                }
+            }
+
+
+            function selectPlayer(id) {
+                activePlayerId = id;
+                const player = players.find(p => p.id === id);
+                if (player) {
+                    selectedPlayerNameSpan.textContent = player.name || `P${player.id}`;
+                    statSelectionOverlay.classList.remove('hidden');
+                    renderPlayers(); 
+                }
+            }
+
+            function updatePlayerStat(playerId, statType, value) {
+                const player = players.find(p => p.id === playerId);
+                if (player) {
+                    lastStatChange = {
+                        playerId: playerId,
+                        statType: statType,
+                        valueChanged: value, 
+                        isAdded: true 
+                    };
+
+                    if (statType === 'points') {
+                        player.points += value;
+                    } else {
+                        player[statType] += value; 
+                    }
+
+                    saveGameData(); 
+                    renderPlayers(); 
+                    showToast(`${player.name || `P${player.id}`} +${value} ${statType}!`, 'success');
+                }
+            }
+
+            function updateRivalScore(value) {
+                lastStatChange = {
+                    playerId: 'rival', 
+                    statType: 'points',
+                    valueChanged: value,
+                    isAdded: true
+                };
+                
+                rivalPoints += value;
+                rivalTeamScoreSpan.textContent = rivalPoints;
+                saveGameData();
+                showToast(`Rival +${value} points!`, 'info');
+            }
+
+            function undoLastStat() {
+                if (!lastStatChange) {
+                    showToast('Nothing to undo!', 'info');
+                    return;
+                }
+
+                const { playerId, statType, valueChanged, isAdded } = lastStatChange;
+
+                if (playerId === 'rival') {
+                    rivalPoints -= valueChanged;
+                    if (rivalPoints < 0) rivalPoints = 0; 
+                    rivalTeamScoreSpan.textContent = rivalPoints;
+                    showToast(`Rival -${valueChanged} points (Undone)!`, 'info');
+                } else {
+                    const player = players.find(p => p.id === playerId);
+                    if (player) {
+                        if (statType === 'points') {
+                            player.points -= valueChanged;
+                            if (player.points < 0) player.points = 0; 
+                        } else {
+                            player[statType] -= valueChanged;
+                            if (player[statType] < 0) player[statType] = 0; 
+                        }
+                        renderPlayers(); 
+                        showToast(`${player.name || `P${player.id}`} -${valueChanged} ${statType} (Undone)!`, 'warning');
+                    }
+                }
+                
+                lastStatChange = null; 
+                saveGameData(); 
+            }
+
+
+            function saveGameData() {
+                localStorage.setItem('basketballTrackerPlayers', JSON.stringify(players));
+                localStorage.setItem('basketballTrackerMyTeamScore', myTeamScore);
+                localStorage.setItem('basketballTrackerRivalPoints', rivalPoints);
+                localStorage.setItem('basketballTrackerLastStatChange', JSON.stringify(lastStatChange));
+            }
+
+            function loadGameData() {
+                const savedPlayers = localStorage.getItem('basketballTrackerPlayers');
+                const savedMyTeamScore = localStorage.getItem('basketballTrackerMyTeamScore');
+                const savedRivalPoints = localStorage.getItem('basketballTrackerRivalPoints');
+                const savedLastStatChange = localStorage.getItem('basketballTrackerLastStatChange');
+
+                if (savedPlayers) {
+                    players = JSON.parse(savedPlayers);
+                }
+                if (savedMyTeamScore) {
+                    myTeamScore = parseInt(savedMyTeamScore);
+                    myTeamScoreSpan.textContent = myTeamScore;
+                }
+                if (savedRivalPoints) {
+                    rivalPoints = parseInt(savedRivalPoints);
+                    rivalTeamScoreSpan.textContent = rivalPoints;
+                }
+                if (savedLastStatChange && savedLastStatChange !== 'null') { 
+                    lastStatChange = JSON.parse(savedLastStatChange);
+                } else {
+                    lastStatChange = null;
+                }
+                renderPlayers();
+            }
+
+            function addPlayer(event) {
+                event.preventDefault();
+                if (players.length >= MAX_PLAYERS) {
+                    showToast('Maximum players reached!', 'error');
+                    return;
+                }
+                const name = newPlayerNameInput.value.trim();
+                if (name) {
+                    const newPlayer = {
+                        id: Date.now(), 
+                        name: name,
+                        shots: 0,
+                        rebounds: 0,
+                        assists: 0,
+                        points: 0
+                    };
+                    players.push(newPlayer);
+                    newPlayerNameInput.value = ''; 
+                    saveGameData();
+                    renderEditPlayersList();
+                    renderPlayers(); 
+                    showToast(`${name} added!`, 'success');
+                } else {
+                    showToast('Player name cannot be empty!', 'error');
+                }
+            }
+
+            function editPlayer(playerId) {
+                const player = players.find(p => p.id === playerId);
+                if (player) {
+                    const newName = prompt(`Edit name for ${player.name || `P${player.id}`}:`, player.name);
+                    if (newName !== null && newName.trim() !== '') {
+                        player.name = newName.trim();
+                        saveGameData();
+                        renderEditPlayersList();
+                        renderPlayers(); 
+                        showToast(`Player name updated to ${player.name}!`, 'success');
+                    } else if (newName !== null) { 
+                         showToast('Player name cannot be empty!', 'error');
+                    }
+                }
+            }
+
+            function deletePlayer(playerId) {
+                if (confirm('Are you sure you want to delete this player? All their stats will be lost.')) {
+                    players = players.filter(p => p.id !== playerId);
+                    if (activePlayerId === playerId) {
+                        activePlayerId = null; 
+                        statSelectionOverlay.classList.add('hidden'); 
+                    }
+                    saveGameData();
+                    renderEditPlayersList();
+                    renderPlayers(); 
+                    showToast('Player deleted!', 'warning');
+                }
+            }
+            
+            function resetGame() {
+                if (confirm('Are you sure you want to reset the entire game? All player stats and scores will be cleared.')) {
+                    players.forEach(player => {
+                        player.shots = 0;
+                        player.rebounds = 0;
+                        player.assists = 0;
+                        player.points = 0;
+                    });
+                    myTeamScore = 0;
+                    rivalPoints = 0;
+                    activePlayerId = null;
+                    lastStatChange = null; 
+                    myTeamScoreSpan.textContent = myTeamScore;
+                    rivalTeamScoreSpan.textContent = rivalPoints;
+                    saveGameData();
+                    renderPlayers();
+                    showToast('Game has been reset!', 'info');
+                }
+            }
+
+            function openReportModal() { // Renamed from generateReport
+                let reportText = `Basketball Game Report\n\n`;
+                reportText += `My Team Score: ${myTeamScore}\n`;
+                reportText += `Rival Points: ${rivalPoints}\n\n`;
+                reportText += `--- Player Stats ---\n`;
+
+                if (players.length === 0) {
+                    reportText += "No players recorded.\n";
+                } else {
+                    players.sort((a, b) => b.points - a.points); 
+                    players.forEach(player => {
+                        reportText += `\n${player.name || `P${player.id}`}:\n`;
+                        reportText += `  Points: ${player.points}\n`;
+                        reportText += `  Shots: ${player.shots}\n`;
+                        reportText += `  Rebounds: ${player.rebounds}\n`;
+                        reportText += `  Assists: ${player.assists}\n`;
+                    });
+                }
+
+                reportOutput.textContent = reportText;
+                reportOverlay.classList.remove('hidden');
+            }
+
+            function closeReportModal() {
+                reportOverlay.classList.add('hidden');
+            }
+
+            function openAppDataModal() {
+                appDataOverlay.classList.remove('hidden');
+            }
+
+            function closeAppDataModal() {
+                appDataOverlay.classList.add('hidden');
+            }
+
+            function openEditPlayersModal() {
+                editPlayersOverlay.classList.remove('hidden');
+                renderEditPlayersList();
+            }
+
+            function closeEditPlayersModal() {
+                editPlayersOverlay.classList.add('hidden');
+            }
+
+            function renderEditPlayersList() {
+                editPlayersList.innerHTML = ''; 
+                if (players.length === 0) {
+                    editPlayersList.innerHTML = '<p class="text-center text-gray-500 col-span-3">No players to edit. Add one above!</p>';
+                    return;
+                }
+                players.forEach(player => {
+                    const li = document.createElement('li');
+                    li.classList.add('flex', 'justify-between', 'items-center', 'py-2', 'border-b', 'border-gray-200');
+                    li.innerHTML = `
+                        <span class="text-lg">${player.name || `P${player.id}`}</span>
+                        <div>
+                            <button onclick="editPlayer(${player.id})" class="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 mr-2">Edit</button>
+                            <button onclick="deletePlayer(${player.id})" class="bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600">Delete</button>
+                        </div>
+                    `;
+                    editPlayersList.appendChild(li);
+                });
+            }
+
+
+            // --- Initialization ---
+            loadGameData();
+            // Ensure no modal is open by explicitly hiding them on load
+            statSelectionOverlay.classList.add('hidden');
+            editPlayersOverlay.classList.add('hidden');
+            reportOverlay.classList.add('hidden');
+            appDataOverlay.classList.add('hidden');
+        }); // End of DOMContentLoaded
+    </script>
+</body>
+</html>
