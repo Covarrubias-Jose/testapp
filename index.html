@@ -31,7 +31,6 @@ body {
     max-width: 600px;
     width: 100%;
     
-    /* MODIFIED: Adjusted the alpha (transparency) from 0.7 to 0.9 for better visibility */
     background-color: rgba(255, 255, 255, 0.7); 
     border-radius: 1.25rem;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
@@ -179,7 +178,7 @@ body {
     }
     /* MODIFIED: Player name font size for small screens */
     .player-name {
-        font-size: 0.9rem; /* Slightly larger on small screens */
+        font-size: 1.15rem; /* Adjusted for smaller screens */
     }
     /* MODIFIED: Player stats margin top for small screens */
     .player-stats span {
@@ -193,14 +192,14 @@ body {
     .text-lg { font-size: 0.8rem; }
 }
 
-/* MODIFIED: Player name font size for larger screens (default) */
+/* UPDATED: Player name font size for larger screens (default) */
 .player-name {
     font-size: 1.75rem; /* Equivalent to 28px */
-    line-height: 1.2; /* Adjust line-height if needed */
+    line-height: 1.2; 
 }
-/* MODIFIED: Player stats margin-top adjustment */
+/* UPDATED: Player stats margin-top adjustment */
 .player-stats {
-    margin-top: 0.2rem; /* Increased margin to create space below the name */
+    margin-top: 0.25rem; /* Slightly increased margin for better spacing */
 }
 
 
@@ -508,7 +507,7 @@ function selectPlayer(playerId) {
     updateUI(); // Update player button active state
 }
 
-// MODIFIED: Function to increment a stat for the active player, now also recording for undo
+// Function to increment a stat for the active player, now also recording for undo
 function incrementPlayerStat(statType) {
     if (!activePlayerId) {
         showMessageBox('No Player Selected', 'Please select a player first.', 'alert');
@@ -551,7 +550,7 @@ function incrementPlayerStat(statType) {
     }
 }
 
-// NEW: Function to increment rival points, recording for undo
+// Function to increment rival points, recording for undo
 function incrementRivalPoints() {
     rivalTeamScore += 2;
     lastStatActions.push({ playerId: 'rival', statType: 'points', valueChanged: 2, isMyTeamScoreChange: false, rivalScoreChangedValue: 2 });
@@ -562,7 +561,7 @@ function incrementRivalPoints() {
     updateUI();
 }
 
-// NEW: Undo functionality
+// Undo functionality
 function undoLastStat() {
     if (lastStatActions.length === 0) {
         showMessageBox('No Actions to Undo', 'There are no recent actions to undo.', 'alert');
